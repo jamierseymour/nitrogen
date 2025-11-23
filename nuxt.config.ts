@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     "@nuxt/fonts",
     "@nuxt/eslint",
     "@nuxt/image",
-    "@nuxthub/core",
+    // "@nuxthub/core", // Disabled for Vercel deployment - only compatible with Cloudflare
   ],
 
   shopify: {
@@ -76,11 +76,6 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-
-  hub: {
-    // Disable hub database to prevent conflicts
-    database: false,
-  },
 
   nitro: {
     preset: 'vercel',

@@ -1,16 +1,42 @@
 @import 'tailwindcss';
 
 :root {
-  --body-text-color: #000;
-  --body-background-color: #fff;
-  --body-selection-color: #eee;
-  --backgound-line-color: #f4f4f4;
-  --header-height: 36px;
+  /* Flow Sports Brand Colors */
+  --electric-blue: #1B8CFF;
+  --deep-navy: #0A1A2F;
+  --charcoal-black: #111111;
+  --hyper-lime: #C6FF1E;
+  --ice-white: #FFFFFF;
+
+  /* Support Shades */
+  --cool-grey-1: #D9DEE4;
+  --cool-grey-2: #A7B1BD;
+  --deep-blue-tint: #0F243D;
+  --lime-tint: #E6FF8A;
+
+  /* Body defaults */
+  --body-text-color: var(--ice-white);
+  --body-background-color: var(--deep-navy);
+  --body-selection-color: var(--electric-blue);
+  --backgound-line-color: var(--deep-blue-tint);
+  --header-height: 60px;
 }
 
 @theme {
-  --font-sans: 'IBM Plex Sans', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  /* Flow Sports Typography */
+  --font-sans: 'Montserrat', 'Inter', sans-serif;
+  --font-mono: 'Teko', monospace;
+
+  /* Brand color palette */
+  --color-electric-blue: #1B8CFF;
+  --color-deep-navy: #0A1A2F;
+  --color-charcoal: #111111;
+  --color-lime: #C6FF1E;
+  --color-ice-white: #FFFFFF;
+  --color-cool-grey-1: #D9DEE4;
+  --color-cool-grey-2: #A7B1BD;
+  --color-deep-blue-tint: #0F243D;
+  --color-lime-tint: #E6FF8A;
 }
 
 @utility wrapper {
@@ -40,10 +66,10 @@
 }
 
 html {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   font-style: normal;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Inter', 'Montserrat', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
@@ -56,8 +82,59 @@ body {
 }
 
 ::selection {
-  color: var(--body-text-color);
-  background: var(--body-selection-color);
+  color: var(--charcoal-black);
+  background: var(--electric-blue);
+}
+
+/* Flow Sports Custom Utilities */
+.gradient-electric {
+  background: linear-gradient(135deg, var(--electric-blue) 0%, var(--deep-blue-tint) 100%);
+}
+
+.gradient-lime {
+  background: linear-gradient(135deg, var(--hyper-lime) 0%, var(--lime-tint) 100%);
+}
+
+.text-gradient-electric {
+  background: linear-gradient(135deg, var(--electric-blue) 0%, var(--hyper-lime) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-primary {
+  background-color: var(--electric-blue);
+  color: var(--ice-white);
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+  background-color: var(--hyper-lime);
+  color: var(--charcoal-black);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(27, 140, 255, 0.3);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--electric-blue);
+  border: 2px solid var(--electric-blue);
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-secondary:hover {
+  background-color: var(--electric-blue);
+  color: var(--ice-white);
 }
 
 a,

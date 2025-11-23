@@ -28,8 +28,8 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: 'https://nitrogen.nuxt.dev',
-    name: 'Nitrogen',
+    url: 'https://flowsportsnutrition.com',
+    name: 'Flow Sports Nutrition',
   },
 
   sitemap: {
@@ -40,7 +40,7 @@ export default defineNuxtConfig({
 
   robots: {
     disallow: ['/account', '/account/*'],
-    sitemap: 'https://nitrogen.nuxt.dev/sitemap.xml',
+    sitemap: 'https://flowsportsnutrition.com/sitemap.xml',
   },
 
   icon: {
@@ -51,9 +51,14 @@ export default defineNuxtConfig({
   },
 
   fonts: {
+    families: [
+      { name: 'Montserrat', weights: [400, 500, 600, 700, 800] },
+      { name: 'Inter', weights: [400, 500, 600] },
+      { name: 'Teko', weights: [400, 500, 600, 700] },
+    ],
     defaults: {
-      weights: [400, 500],
-      styles: ['normal', 'italic'],
+      weights: [400, 500, 600, 700, 800],
+      styles: ['normal'],
       subsets: ['latin'],
     },
   },

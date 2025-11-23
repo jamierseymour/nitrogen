@@ -36,12 +36,12 @@
               </span>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
+            <h1 class="text-5xl md:text-7xl font-heading leading-tight">
               FUEL YOUR
               <span class="text-gradient-electric block">FLOW STATE</span>
             </h1>
 
-            <p class="text-xl text-cool-grey-1 max-w-xl leading-relaxed">
+            <p class="text-xl text-cool-grey-1 max-w-xl leading-relaxed font-body">
               Science-backed supplements engineered for athletes who demand peak performance.
               Clean ingredients. Maximum results. Zero compromises.
             </p>
@@ -136,11 +136,11 @@
     <section class="bg-charcoal py-20">
       <div class="container mx-auto px-6">
         <div class="text-center mb-12">
-          <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+          <h2 class="text-4xl md:text-5xl font-heading mb-4">
             PERFORMANCE
             <span class="text-gradient-electric">LINEUP</span>
           </h2>
-          <p class="text-cool-grey-1 text-lg max-w-2xl mx-auto">
+          <p class="text-cool-grey-1 text-lg max-w-2xl mx-auto font-body">
             Premium supplements designed for athletes, formulated by science
           </p>
         </div>
@@ -182,10 +182,10 @@
 
       <div class="container mx-auto px-6 relative z-10">
         <div class="max-w-3xl mx-auto text-center space-y-6">
-          <h2 class="text-4xl md:text-5xl font-extrabold text-charcoal">
+          <h2 class="text-4xl md:text-5xl font-heading text-charcoal">
             JOIN THE FLOW MOVEMENT
           </h2>
-          <p class="text-xl text-deep-navy leading-relaxed">
+          <p class="text-xl text-deep-navy leading-relaxed font-body">
             Get exclusive access to new products, athlete stories, and performance tips. Plus 15% off your first order.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -207,11 +207,11 @@
     <section class="bg-deep-navy py-20">
       <div class="container mx-auto px-6">
         <div class="text-center mb-12">
-          <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+          <h2 class="text-4xl md:text-5xl font-heading mb-4">
             BUILT FOR
             <span class="text-gradient-electric">CHAMPIONS</span>
           </h2>
-          <p class="text-cool-grey-1 text-lg">
+          <p class="text-cool-grey-1 text-lg font-body">
             Trusted by athletes across MMA, Jiu-Jitsu, CrossFit, and beyond
           </p>
         </div>

@@ -8,9 +8,8 @@ const emits = defineEmits<{
 
 // Links
 const navLinksLeft = [
-  { label: 'Shop', path: '/collections/latest' },
-  { label: 'Catalog', path: '/collections/latest' },
-  { label: 'About', path: '/collections/latest' },
+  { label: 'Products', path: '/products' },
+  { label: 'About', path: '/about' },
 ]
 
 const navLinksRight = [
@@ -47,7 +46,7 @@ const toggleCartDrawer = () => {
         v-for="link in navLinksLeft"
         :key="link.label"
         :to="link.path"
-        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
       >
         <span>{{ link.label }}</span>
       </NuxtLink>
@@ -56,14 +55,14 @@ const toggleCartDrawer = () => {
       <NuxtLink
         id="logo"
         to="/"
-        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
       >
-        <span>Nitrogen</span>
+        <span>Flow Sports</span>
       </NuxtLink>
     </div>
     <div class="grid grid-flow-col justify-end items-center">
       <button
-        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
         @click="toggleLocaleModal"
       >
         <span>{{ countryCode }} / {{ currencySymbol }}</span>
@@ -72,18 +71,18 @@ const toggleCartDrawer = () => {
         v-for="link in navLinksRight"
         :key="link.label"
         :to="link.path"
-        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
       >
         <span>{{ link.label }}</span>
       </NuxtLink>
       <button
-        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
         @click="toggleSearchMenu"
       >
         <span>Search</span>
       </button>
       <button
-        class="px-2.5 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-zinc-100"
+        class="px-2.5 py-0.5 text-normalize bg-transparent rounded-md transition duration-200 hover:bg-electric-blue/10 hover:text-electric-blue"
         @click="toggleCartDrawer"
       >
         <span>Cart ({{ cartTotalItems }})</span>

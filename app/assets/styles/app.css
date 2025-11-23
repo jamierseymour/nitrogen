@@ -1,3 +1,4 @@
+@import './fonts.css';
 @import 'tailwindcss';
 
 :root {
@@ -24,8 +25,9 @@
 
 @theme {
   /* Flow Sports Typography */
-  --font-sans: 'Montserrat', 'Inter', sans-serif;
-  --font-mono: 'Teko', monospace;
+  --font-sans: 'Satoshi', system-ui, -apple-system, sans-serif;
+  --font-display: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Poppins', monospace;
 
   /* Brand color palette */
   --color-electric-blue: #1B8CFF;
@@ -69,7 +71,7 @@ html {
   font-size: 16px;
   font-weight: 400;
   font-style: normal;
-  font-family: 'Inter', 'Montserrat', sans-serif;
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
@@ -79,6 +81,13 @@ body {
   color: var(--body-text-color);
   background-color: var(--body-background-color);
   overflow-x: hidden;
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+}
+
+/* Headings use Poppins ExtraBold */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  font-weight: 800; /* ExtraBold */
 }
 
 ::selection {
@@ -87,6 +96,16 @@ body {
 }
 
 /* Flow Sports Custom Utilities */
+.font-heading {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  font-weight: 800; /* ExtraBold */
+}
+
+.font-body {
+  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+  font-weight: 400; /* Regular */
+}
+
 .gradient-electric {
   background: linear-gradient(135deg, var(--electric-blue) 0%, var(--deep-blue-tint) 100%);
 }

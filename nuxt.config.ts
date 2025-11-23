@@ -1,17 +1,20 @@
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  compatibilityDate: "2025-11-23",
+
   modules: [
-    '@pinia/nuxt',
-    'pinia-plugin-persistedstate/nuxt',
-    '@vueuse/nuxt',
-    '@nuxtjs/sitemap',
-    '@nuxtjs/robots',
-    '@nuxt/icon',
-    '@nuxt/fonts',
-    '@nuxt/eslint',
-    '@nuxthub/core',
+    "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
+    "@vueuse/nuxt",
+    "@nuxtjs/sitemap",
+    "@nuxtjs/robots",
+    "@nuxt/icon",
+    "@nuxt/fonts",
+    "@nuxt/eslint",
+    "@nuxt/image",
+    "@nuxthub/core",
   ],
 
   shopify: {
@@ -28,19 +31,17 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: 'https://flowsportsnutrition.com',
-    name: 'Flow Sports Nutrition',
+    url: "https://flowsportsnutrition.com",
+    name: "Flow Sports Nutrition",
   },
 
   sitemap: {
-    sources: [
-      '/api/sitemap',
-    ],
+    sources: ["/api/sitemap"],
   },
 
   robots: {
-    disallow: ['/account', '/account/*'],
-    sitemap: 'https://flowsportsnutrition.com/sitemap.xml',
+    disallow: ["/account", "/account/*"],
+    sitemap: "https://flowsportsnutrition.com/sitemap.xml",
   },
 
   icon: {
@@ -50,18 +51,12 @@ export default defineNuxtConfig({
     },
   },
 
-  fonts: {
-    families: [
-      { name: 'Montserrat', weights: [400, 500, 600, 700, 800] },
-      { name: 'Inter', weights: [400, 500, 600] },
-      { name: 'Teko', weights: [400, 500, 600, 700] },
-    ],
-    defaults: {
-      weights: [400, 500, 600, 700, 800],
-      styles: ['normal'],
-      subsets: ['latin'],
-    },
-  },
+  // Disabled @nuxt/fonts module - using custom fonts in app/assets/styles/fonts.css
+  // fonts: {
+  //   providers: {
+  //     none: true,
+  //   },
+  // },
 
   eslint: {
     config: {
@@ -69,7 +64,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ['@/assets/styles/app.css'],
+  css: ["@/assets/styles/app.css"],
 
   vite: {
     plugins: [tailwindcss()],
@@ -77,8 +72,13 @@ export default defineNuxtConfig({
 
   components: [
     {
-      path: '@/components',
+      path: "@/components",
       pathPrefix: false,
     },
   ],
-})
+
+  hub: {
+    // Disable hub database to prevent conflicts
+    database: false,
+  },
+});

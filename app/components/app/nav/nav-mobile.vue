@@ -44,7 +44,7 @@ const toggleCartDrawer = () => {
         to="/"
         class="p-2 text-normalize bg-transparent rounded-full"
       >
-        <span>Nitrogen</span>
+        <span>Flow Sports</span>
       </NuxtLink>
     </div>
     <div class="grid grid-flow-col justify-end items-center">

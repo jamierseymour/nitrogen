@@ -1,10 +1,9 @@
 <script setup lang="ts">
 // Links
 const navLinks = [
-  { label: 'Shop', path: '/collections/latest' },
-  { label: 'Catalog', path: '/collections/latest' },
+  { label: 'Products', path: '/products' },
+  { label: 'About', path: '/about' },
   { label: 'Account', path: '/account' },
-  { label: 'About', path: '/collections/latest' },
 ]
 
 // Stores
@@ -36,7 +35,7 @@ if (escape) {
   <Transition name="clip">
     <aside
       v-if="appStore.mobileMenu"
-      class="fixed inset-0 size-full z-50 bg-white"
+      class="fixed inset-0 size-full z-50 bg-charcoal"
     >
       <div class="flex flex-col size-full px-6">
         <div class="flex flex-col flex-1 mt-(--header-height) py-6 overflow-y-scroll overflow-x-hidden no-scrollbar">
@@ -44,14 +43,14 @@ if (escape) {
             v-for="link in navLinks"
             :key="link.label"
             :to="link.path"
-            class="py-1 text-xl tracking-tight"
+            class="py-1 text-xl tracking-tight text-ice-white hover:text-electric-blue transition-colors"
           >
             <span>{{ link.label }}</span>
           </NuxtLink>
         </div>
         <div class="flex flex-col mb-4">
           <button
-            class="flex items-center justify-center p-2 px-4 bg-transparent border border-zinc-300 rounded-md"
+            class="flex items-center justify-center p-2 px-4 bg-transparent border border-electric-blue rounded-md text-ice-white hover:bg-electric-blue transition-colors"
             @click="closeMenu"
           >
             <span class="text-normalize">

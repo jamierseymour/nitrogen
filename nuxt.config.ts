@@ -81,4 +81,8 @@ export default defineNuxtConfig({
     // Disable hub database to prevent conflicts
     database: false,
   },
+
+  nitro: {
+    preset: 'vercel',
+  },
 });

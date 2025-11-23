@@ -78,13 +78,14 @@
           <!-- Hero Image / Product Showcase -->
           <div class="relative">
             <div class="relative z-10">
-              <!-- Placeholder for product image -->
+              <!-- Product image -->
               <div class="aspect-square rounded-2xl bg-gradient-electric p-1">
-                <div class="w-full h-full rounded-xl bg-deep-navy flex items-center justify-center">
-                  <div class="text-center space-y-4">
-                    <div class="w-32 h-32 mx-auto rounded-full gradient-electric opacity-20" />
-                    <p class="text-cool-grey-2 text-sm">Product Image</p>
-                  </div>
+                <div class="w-full h-full rounded-xl overflow-hidden">
+                  <img
+                    src="/jits/product-2.jpg"
+                    alt="Flow Sports Product"
+                    class="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>

@@ -9,6 +9,7 @@ const emits = defineEmits<{
 // Links
 const navLinksLeft = [
   { label: 'Products', path: '/products' },
+  { label: 'Athletes', path: '/athletes' },
   { label: 'About', path: '/about' },
 ]
 

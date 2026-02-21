@@ -11,12 +11,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@nuxt/fonts": "^0.12.1",
     "@nuxt/icon": "^2.1.0",
     "@nuxt/image": "^2.0.0",
     "@nuxtjs/robots": "^5.5.6",
     "@nuxtjs/sitemap": "^7.4.7",
     "@pinia/nuxt": "0.11.3",
+    "@supabase/supabase-js": "^2.97.0",
     "@vueuse/core": "^14.0.0",
     "@vueuse/nuxt": "^14.0.0",
     "dotenv": "^17.2.3",

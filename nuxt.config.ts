@@ -30,6 +30,14 @@ export default defineNuxtConfig({
     privateApiKey: process.env.NUXT_KLAVIYO_PRIVATE_API_KEY,
   },
 
+  runtimeConfig: {
+    supabaseUrl: process.env.NUXT_SUPABASE_URL,
+    supabaseKey: process.env.NUXT_SUPABASE_ANON_KEY,
+    public: {
+      googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    },
+  },
+
   site: {
     url: "https://flowsportsnutrition.com",
     name: "Flow Sports Nutrition",

@@ -7,7 +7,8 @@
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm config:*)",
       "Bash(pnpm install)",
-      "Bash(pnpm run dev:*)"
+      "Bash(pnpm run dev:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

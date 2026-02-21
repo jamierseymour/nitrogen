@@ -2,6 +2,7 @@
 // Links
 const navLinks = [
   { label: 'Products', path: '/products' },
+  { label: 'Athletes', path: '/athletes' },
   { label: 'About', path: '/about' },
   { label: 'Account', path: '/account' },
 ]

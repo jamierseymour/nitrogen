@@ -157,6 +157,88 @@ const removeRecord = (index: number) => {
   formData.value.competition_record.splice(index, 1)
 }
 
+// ─── CSV Import (Smoothcomp format) ────────────────────────────────────────
+
+const csvInputRef = ref<HTMLInputElement | null>(null)
+const csvImportCount = ref(0)
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      inQuotes = !inQuotes
+    }
+    else if (line[i] === ',' && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+    }
+    else {
+      current += line[i]
+    }
+  }
+  result.push(current.trim())
+  return result
+}
+
+function parseCSV(text: string): Record<string, string>[] {
+  const lines = text.trim().split('\n').filter(Boolean)
+  if (lines.length < 2) return []
+  const headers = parseCSVLine(lines[0])
+  return lines.slice(1).map((line) => {
+    const values = parseCSVLine(line)
+    return Object.fromEntries(headers.map((h, i) => [h.trim(), values[i] ?? '']))
+  })
+}
+
+function toISODate(dateStr: string): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    return Number.isNaN(d.getTime()) ? dateStr : d.toISOString().split('T')[0]
+  }
+  catch {
+    return dateStr
+  }
+}
+
+function mapResult(raw: string): CompetitionRecord['result'] {
+  const v = (raw || '').toUpperCase().trim()
+  if (v === 'WIN') return 'Win'
+  if (v === 'LOSS') return 'Loss'
+  if (v === 'DRAW') return 'Draw'
+  return 'No Contest'
+}
+
+function handleCSVImport(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const text = e.target?.result as string
+    const rows = parseCSV(text)
+    let added = 0
+    for (const row of rows) {
+      const opponent = row.name?.trim()
+      if (!opponent) continue
+      formData.value.competition_record.push({
+        event: row.data3?.trim() || '',
+        date: toISODate(row.data2?.trim() || ''),
+        opponent,
+        result: mapResult(row.data4 || ''),
+        method: '',
+        round: null,
+        notes: row.data?.trim() || '',
+      })
+      added++
+    }
+    csvImportCount.value = added
+    if (csvInputRef.value) csvInputRef.value.value = ''
+  }
+  reader.readAsText(file)
+}
+
 // ─── Open / close ──────────────────────────────────────────────────────────
 
 const openCreate = () => {
@@ -714,13 +796,40 @@ useSeoMeta({
 
               <!-- ── Competition Record ── -->
               <section class="space-y-4">
-                <h3 class="text-gray-700 font-medium text-lg border-b border-gray-200 pb-2">
-                  Competition Record
-                </h3>
+                <div class="flex items-center gap-3 border-b border-gray-200 pb-2">
+                  <h3 class="text-gray-700 font-medium text-lg flex-1">
+                    Competition Record
+                  </h3>
+                  <!-- CSV import -->
+                  <input
+                    ref="csvInputRef"
+                    type="file"
+                    accept=".csv"
+                    class="hidden"
+                    @change="handleCSVImport"
+                  >
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors px-3 py-1.5 rounded-lg"
+                    @click="csvInputRef?.click()"
+                  >
+                    <Icon name="ph:upload-simple" class="w-3.5 h-3.5" />
+                    Import CSV
+                  </button>
+                </div>
+
+                <!-- CSV import success notice -->
+                <div
+                  v-if="csvImportCount > 0"
+                  class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 text-sm text-green-700"
+                >
+                  <Icon name="ph:check-circle" class="w-4 h-4 shrink-0" />
+                  {{ csvImportCount }} result{{ csvImportCount === 1 ? '' : 's' }} imported from CSV. Review below — you can remove any incorrect entries.
+                </div>
 
                 <!-- Add record form -->
                 <div class="bg-gray-100 rounded-lg p-4 space-y-3">
-                  <p class="text-gray-700 text-sm font-medium">Add a Result</p>
+                  <p class="text-gray-700 text-sm font-medium">Add a Result Manually</p>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>

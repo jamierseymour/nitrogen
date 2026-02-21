@@ -34,7 +34,7 @@ useSeoMeta({
   description: description.value,
   ogTitle: title.value,
   ogDescription: description.value,
-  ogImage: athlete.value?.image_url || undefined,
+  ogImage: athlete.value?.avatar_image_url || undefined,
 })
 
 const wins = computed(() => athlete.value?.competition_record.filter(r => r.result === 'Win').length ?? 0)
@@ -72,12 +72,12 @@ const resultClass = (result: string) => {
       <!-- Hero -->
       <div class="relative h-72 md:h-96 bg-[--charcoal-black] overflow-hidden">
         <img
-          v-if="athlete.image_url"
-          :src="athlete.image_url"
+          v-if="athlete.cover_image_url"
+          :src="athlete.cover_image_url"
           :alt="athlete.name"
           class="w-full h-full object-cover object-top"
         >
-        <div class="absolute inset-0 bg-gradient-to-t from-[--deep-navy] via-[--deep-navy]/60 to-transparent" />
+        <div class="absolute inset-0 bg-linear-to-t from-[--deep-navy] via-[--deep-navy]/60 to-transparent" />
 
         <!-- Back Button -->
         <div class="absolute top-4 left-4">
@@ -92,13 +92,19 @@ const resultClass = (result: string) => {
 
         <!-- Name overlay -->
         <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <div class="container mx-auto">
-            <span class="inline-block bg-[--electric-blue] text-white text-sm font-medium px-2 py-0.5 rounded mb-2">
-              {{ athlete.sport }}
-            </span>
-            <h1 class="font-heading text-4xl md:text-5xl lg:text-6xl text-[--ice-white]">
-              {{ athlete.name }}
-            </h1>
+          <div class="container mx-auto flex items-end gap-5">
+            <!-- Avatar -->
+            <div v-if="athlete.avatar_image_url" class="w-20 h-20 md:w-28 md:h-28 rounded-xl overflow-hidden border-2 border-white/20 shrink-0">
+              <img :src="athlete.avatar_image_url" :alt="athlete.name" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <span class="inline-block bg-[--electric-blue] text-white text-sm font-medium px-2 py-0.5 rounded mb-2">
+                {{ athlete.sport }}
+              </span>
+              <h1 class="font-heading text-4xl md:text-5xl lg:text-6xl text-[--ice-white]">
+                {{ athlete.name }}
+              </h1>
+            </div>
           </div>
         </div>
       </div>
@@ -186,31 +192,47 @@ const resultClass = (result: string) => {
                 <h2 class="font-heading text-xl text-[--ice-white]">Details</h2>
 
                 <div v-if="athlete.nationality" class="flex items-center gap-3">
-                  <Icon name="ph:flag" class="w-5 h-5 text-[--electric-blue] flex-shrink-0" />
+                  <Icon name="ph:flag" class="w-5 h-5 text-[--electric-blue] shrink-0" />
                   <div>
                     <p class="text-[--cool-grey-1] text-sm">Nationality</p>
                     <p class="text-[--ice-white]">{{ athlete.nationality }}</p>
                   </div>
                 </div>
 
+                <div v-if="athlete.age" class="flex items-center gap-3">
+                  <Icon name="ph:calendar" class="w-5 h-5 text-[--electric-blue] shrink-0" />
+                  <div>
+                    <p class="text-[--cool-grey-1] text-sm">Age</p>
+                    <p class="text-[--ice-white]">{{ athlete.age }}</p>
+                  </div>
+                </div>
+
                 <div v-if="athlete.sport" class="flex items-center gap-3">
-                  <Icon name="ph:medal" class="w-5 h-5 text-[--electric-blue] flex-shrink-0" />
+                  <Icon name="ph:medal" class="w-5 h-5 text-[--electric-blue] shrink-0" />
                   <div>
                     <p class="text-[--cool-grey-1] text-sm">Sport</p>
                     <p class="text-[--ice-white]">{{ athlete.sport }}</p>
                   </div>
                 </div>
 
-                <div v-if="athlete.weight_class" class="flex items-center gap-3">
-                  <Icon name="ph:scales" class="w-5 h-5 text-[--electric-blue] flex-shrink-0" />
+                <div v-if="athlete.weight_classes?.length" class="flex items-start gap-3">
+                  <Icon name="ph:scales" class="w-5 h-5 text-[--electric-blue] shrink-0 mt-0.5" />
                   <div>
                     <p class="text-[--cool-grey-1] text-sm">Weight Class</p>
-                    <p class="text-[--ice-white]">{{ athlete.weight_class }}</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                      <span
+                        v-for="wc in athlete.weight_classes"
+                        :key="wc"
+                        class="text-xs bg-[--electric-blue]/10 text-[--electric-blue] px-2 py-0.5 rounded-full"
+                      >
+                        {{ wc }}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div v-if="athlete.team" class="flex items-center gap-3">
-                  <Icon name="ph:shield" class="w-5 h-5 text-[--electric-blue] flex-shrink-0" />
+                  <Icon name="ph:shield" class="w-5 h-5 text-[--electric-blue] shrink-0" />
                   <div>
                     <p class="text-[--cool-grey-1] text-sm">Team</p>
                     <p class="text-[--ice-white]">{{ athlete.team }}</p>

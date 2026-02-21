@@ -21,10 +21,12 @@ export interface Athlete {
   slug: string
   sport: string
   bio?: string
-  image_url?: string
+  avatar_image_url?: string
+  cover_image_url?: string
   competition_record: CompetitionRecord[]
   nationality: string
-  weight_class?: string
+  age?: number | null
+  weight_classes: string[]
   team?: string
   social_links: SocialLinks
   created_at: string

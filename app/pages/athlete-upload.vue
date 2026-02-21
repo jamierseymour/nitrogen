@@ -1,6 +1,34 @@
 <script setup lang="ts">
 import type { Athlete, CompetitionRecord } from '~/types/athlete'
 
+// ─── Weight classes ────────────────────────────────────────────────────────
+
+const WEIGHT_CLASSES = [
+  { group: 'BJJ (IBJJF)', options: [
+    'Rooster (57.5 kg / 126.8 lbs)',
+    'Light Feather (64 kg / 141.1 lbs)',
+    'Feather (70 kg / 154.3 lbs)',
+    'Light (76 kg / 167.6 lbs)',
+    'Middle (82.3 kg / 181.4 lbs)',
+    'Medium Heavy (88.3 kg / 194.7 lbs)',
+    'Heavy (94.3 kg / 207.9 lbs)',
+    'Super Heavy (100.5 kg / 221.6 lbs)',
+    'Ultra Heavy (100.5+ kg / 221.6+ lbs)',
+  ] },
+]
+
+const showWeightDropdown = ref(false)
+
+function toggleWeightClass(value: string) {
+  const idx = formData.value.weight_classes.indexOf(value)
+  if (idx === -1) {
+    formData.value.weight_classes.push(value)
+  }
+  else {
+    formData.value.weight_classes.splice(idx, 1)
+  }
+}
+
 definePageMeta({
   layout: 'default',
 })
@@ -18,14 +46,69 @@ const editingSlug = ref<string | null>(null)
 const submitError = ref<string | null>(null)
 const submitting = ref(false)
 
+// ─── Image uploads ─────────────────────────────────────────────────────────
+
+const avatarInputRef = ref<HTMLInputElement | null>(null)
+const coverInputRef = ref<HTMLInputElement | null>(null)
+const uploadingAvatar = ref(false)
+const uploadingCover = ref(false)
+const uploadError = ref<string | null>(null)
+
+async function uploadImage(file: File, type: 'avatar' | 'cover') {
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('type', type)
+
+  const { url } = await $fetch<{ success: boolean, url: string }>('/api/athletes/upload', {
+    method: 'POST',
+    body: fd,
+  })
+
+  return url
+}
+
+async function handleAvatarFile(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  uploadingAvatar.value = true
+  uploadError.value = null
+  try {
+    formData.value.avatar_image_url = await uploadImage(file, 'avatar')
+  }
+  catch {
+    uploadError.value = 'Avatar upload failed. Check your Supabase storage bucket.'
+  }
+  finally {
+    uploadingAvatar.value = false
+  }
+}
+
+async function handleCoverFile(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  uploadingCover.value = true
+  uploadError.value = null
+  try {
+    formData.value.cover_image_url = await uploadImage(file, 'cover')
+  }
+  catch {
+    uploadError.value = 'Cover upload failed. Check your Supabase storage bucket.'
+  }
+  finally {
+    uploadingCover.value = false
+  }
+}
+
 const blankForm = () => ({
   name: '',
   slug: '',
   sport: 'Brazilian Jiu-Jitsu',
   bio: '',
-  image_url: '',
+  avatar_image_url: '',
+  cover_image_url: '',
+  age: null as number | null,
   nationality: 'South African',
-  weight_class: '',
+  weight_classes: [] as string[],
   team: '',
   social_links: {
     instagram: '',
@@ -90,9 +173,11 @@ const openEdit = (athlete: Athlete) => {
     slug: athlete.slug,
     sport: athlete.sport,
     bio: athlete.bio || '',
-    image_url: athlete.image_url || '',
+    avatar_image_url: athlete.avatar_image_url || '',
+    cover_image_url: athlete.cover_image_url || '',
+    age: athlete.age ?? null,
     nationality: athlete.nationality,
-    weight_class: athlete.weight_class || '',
+    weight_classes: athlete.weight_classes || [],
     team: athlete.team || '',
     social_links: {
       instagram: athlete.social_links?.instagram || '',
@@ -194,7 +279,7 @@ useSeoMeta({
 
       <!-- Global error from store -->
       <div v-if="athletesStore.error" class="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-start gap-3">
-        <Icon name="ph:warning" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+        <Icon name="ph:warning" class="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
         <p class="text-red-400">{{ athletesStore.error }}</p>
       </div>
 
@@ -221,10 +306,10 @@ useSeoMeta({
           class="bg-[--deep-blue-tint] rounded-lg p-5 flex items-center gap-4"
         >
           <!-- Thumbnail -->
-          <div class="w-16 h-16 rounded-lg overflow-hidden bg-[--charcoal-black] flex-shrink-0">
+          <div class="w-16 h-16 rounded-lg overflow-hidden bg-[--charcoal-black] shrink-0">
             <img
-              v-if="athlete.image_url"
-              :src="athlete.image_url"
+              v-if="athlete.avatar_image_url"
+              :src="athlete.avatar_image_url"
               :alt="athlete.name"
               class="w-full h-full object-cover"
             >
@@ -251,7 +336,7 @@ useSeoMeta({
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2 flex-shrink-0">
+          <div class="flex gap-2 shrink-0">
             <NuxtLink
               :to="`/athletes/${athlete.slug}`"
               class="btn-secondary py-2 px-3"
@@ -293,18 +378,18 @@ useSeoMeta({
       >
         <div class="min-h-screen flex items-start justify-center p-4 py-8">
           <form
-            class="bg-[--deep-blue-tint] rounded-xl max-w-3xl w-full"
+            class="bg-white rounded-xl max-w-3xl w-full"
             @submit.prevent="handleSubmit"
           >
 
             <!-- Modal header -->
-            <div class="sticky top-0 bg-[--deep-blue-tint] border-b border-[--cool-grey-2]/20 p-6 flex justify-between items-center rounded-t-xl z-10">
-              <h2 class="font-heading text-2xl text-[--ice-white]">
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-xl z-10">
+              <h2 class="font-heading text-2xl text-gray-900">
                 {{ editingSlug ? 'Edit Athlete' : 'Add New Athlete' }}
               </h2>
               <button
                 type="button"
-                class="text-[--cool-grey-2] hover:text-[--ice-white] transition-colors"
+                class="text-gray-400 hover:text-gray-700 transition-colors"
                 @click="closeForm"
               >
                 <Icon name="ph:x" class="w-6 h-6" />
@@ -316,24 +401,24 @@ useSeoMeta({
 
               <!-- ── Basic Info ── -->
               <section class="space-y-4">
-                <h3 class="text-[--cool-grey-1] font-medium text-lg border-b border-[--cool-grey-2]/20 pb-2">
+                <h3 class="text-gray-700 font-medium text-lg border-b border-gray-200 pb-2">
                   Basic Information
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Name *</label>
+                    <label class="block text-gray-600 text-sm mb-1">Name *</label>
                     <input
                       v-model="formData.name"
                       type="text"
                       required
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="Dricus du Plessis"
                     >
                   </div>
 
                   <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Slug *</label>
+                    <label class="block text-gray-600 text-sm mb-1">Slug *</label>
                     <input
                       v-model="formData.slug"
                       type="text"
@@ -341,79 +426,230 @@ useSeoMeta({
                       class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue] font-mono text-sm"
                       placeholder="dricus-du-plessis"
                     >
-                    <p class="text-[--cool-grey-2] text-xs mt-1">Auto-generated from name. Must be unique.</p>
+                    <p class="text-gray-400 text-xs mt-1">Auto-generated from name. Must be unique.</p>
                   </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Sport *</label>
-                    <input
-                      v-model="formData.sport"
-                      type="text"
-                      required
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
-                      placeholder="Brazilian Jiu-Jitsu"
-                    >
+                    <label class="block text-gray-600 text-sm mb-1">Sport</label>
+                    <div class="w-full bg-gray-100 text-gray-500 border border-gray-200 rounded-lg px-4 py-2 text-sm flex items-center gap-2">
+                      <Icon name="ph:medal" class="w-4 h-4 text-blue-500" />
+                      Brazilian Jiu-Jitsu
+                    </div>
                   </div>
 
                   <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Nationality</label>
+                    <label class="block text-gray-600 text-sm mb-1">Nationality</label>
                     <input
                       v-model="formData.nationality"
                       type="text"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="South African"
                     >
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Weight Class</label>
-                    <input
-                      v-model="formData.weight_class"
-                      type="text"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
-                      placeholder="Middleweight (185 lbs)"
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <!-- Weight Class multi-select -->
+                  <div class="md:col-span-2 relative">
+                    <label class="block text-gray-600 text-sm mb-1">Weight Class(es)</label>
+
+                    <!-- Invisible backdrop — closes dropdown on outside click -->
+                    <div
+                      v-if="showWeightDropdown"
+                      class="fixed inset-0 z-10"
+                      @click="showWeightDropdown = false"
+                    />
+
+                    <!-- Trigger button -->
+                    <button
+                      type="button"
+                      class="w-full min-h-[42px] bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-left flex flex-wrap gap-1 items-center focus:outline-none focus:border-[--electric-blue] hover:border-gray-400 transition-colors relative z-20"
+                      @click="showWeightDropdown = !showWeightDropdown"
                     >
+                      <template v-if="formData.weight_classes.length">
+                        <span
+                          v-for="wc in formData.weight_classes"
+                          :key="wc"
+                          class="inline-flex shrink-0 items-center gap-1 bg-blue-100 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full"
+                        >
+                          {{ wc }}
+                          <button
+                            type="button"
+                            class="cursor-pointer hover:text-red-500 leading-none bg-transparent border-0 p-0 text-inherit"
+                            @click.stop="toggleWeightClass(wc)"
+                          >×</button>
+                        </span>
+                      </template>
+                      <span v-else class="text-gray-400 text-sm">Select weight class(es)…</span>
+                      <Icon name="ph:caret-down" class="ml-auto text-gray-400 w-4 h-4 shrink-0" />
+                    </button>
+
+                    <!-- Dropdown panel (z-20, above backdrop) -->
+                    <div
+                      v-if="showWeightDropdown"
+                      class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-72 overflow-y-auto"
+                    >
+                      <div
+                        v-for="group in WEIGHT_CLASSES"
+                        :key="group.group"
+                      >
+                        <div class="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50 sticky top-0">
+                          {{ group.group }}
+                        </div>
+                        <button
+                          v-for="option in group.options"
+                          :key="option"
+                          type="button"
+                          class="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
+                          @click="toggleWeightClass(option)"
+                        >
+                          <span
+                            class="w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors"
+                            :class="formData.weight_classes.includes(option)
+                              ? 'bg-blue-500 border-blue-500'
+                              : 'border-gray-300'"
+                          >
+                            <Icon
+                              v-if="formData.weight_classes.includes(option)"
+                              name="ph:check"
+                              class="w-3 h-3 text-white"
+                            />
+                          </span>
+                          <span
+                            class="flex-1"
+                            :class="formData.weight_classes.includes(option) ? 'text-blue-600 font-medium' : 'text-gray-700'"
+                          >
+                            {{ option }}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
-                    <label class="block text-[--cool-grey-1] text-sm mb-1">Team / Gym</label>
+                    <label class="block text-gray-600 text-sm mb-1">Team / Gym</label>
                     <input
                       v-model="formData.team"
                       type="text"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="Team name"
                     >
                   </div>
+
+                  <div>
+                    <label class="block text-gray-600 text-sm mb-1">Age</label>
+                    <input
+                      v-model.number="formData.age"
+                      type="number"
+                      min="1"
+                      max="99"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      placeholder="e.g. 28"
+                    >
+                  </div>
                 </div>
 
-                <div>
-                  <label class="block text-[--cool-grey-1] text-sm mb-1">Profile Image URL</label>
-                  <input
-                    v-model="formData.image_url"
-                    type="url"
-                    class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
-                    placeholder="https://..."
-                  >
-                  <!-- Image preview -->
-                  <div v-if="formData.image_url" class="mt-3 w-32 h-32 rounded-lg overflow-hidden bg-[--charcoal-black]">
-                    <img
-                      :src="formData.image_url"
-                      alt="Preview"
-                      class="w-full h-full object-cover"
+                <!-- Upload error -->
+                <div v-if="uploadError" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-600 text-sm">
+                  {{ uploadError }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Avatar Image -->
+                  <div>
+                    <label class="block text-gray-600 text-sm mb-1">Avatar Image <span class="text-gray-400">(profile photo)</span></label>
+
+                    <!-- Hidden file input -->
+                    <input
+                      ref="avatarInputRef"
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleAvatarFile"
+                    >
+
+                    <!-- Upload area -->
+                    <button
+                      type="button"
+                      class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[--electric-blue] transition-colors"
+                      @click="avatarInputRef?.click()"
+                    >
+                      <div v-if="uploadingAvatar" class="flex items-center justify-center gap-2 text-gray-500">
+                        <div class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-[--electric-blue] border-r-transparent" />
+                        <span class="text-sm">Uploading...</span>
+                      </div>
+                      <div v-else-if="formData.avatar_image_url" class="flex flex-col items-center gap-2">
+                        <img :src="formData.avatar_image_url" alt="Avatar" class="w-20 h-20 rounded-lg object-cover">
+                        <span class="text-xs text-[--electric-blue]">Click to change</span>
+                      </div>
+                      <div v-else class="flex flex-col items-center gap-2 py-2 text-gray-400">
+                        <Icon name="ph:user-circle" class="w-10 h-10" />
+                        <span class="text-sm">Click to upload avatar</span>
+                        <span class="text-xs">JPG, PNG, WebP</span>
+                      </div>
+                    </button>
+
+                    <!-- Manual URL fallback -->
+                    <input
+                      v-model="formData.avatar_image_url"
+                      type="url"
+                      class="w-full mt-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[--electric-blue]"
+                      placeholder="Or paste image URL"
+                    >
+                  </div>
+
+                  <!-- Cover Image -->
+                  <div>
+                    <label class="block text-gray-600 text-sm mb-1">Cover Image <span class="text-gray-400">(hero banner)</span></label>
+
+                    <!-- Hidden file input -->
+                    <input
+                      ref="coverInputRef"
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleCoverFile"
+                    >
+
+                    <!-- Upload area -->
+                    <button
+                      type="button"
+                      class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[--electric-blue] transition-colors"
+                      @click="coverInputRef?.click()"
+                    >
+                      <div v-if="uploadingCover" class="flex items-center justify-center gap-2 text-gray-500">
+                        <div class="h-4 w-4 animate-spin rounded-full border-2 border-solid border-[--electric-blue] border-r-transparent" />
+                        <span class="text-sm">Uploading...</span>
+                      </div>
+                      <div v-else-if="formData.cover_image_url" class="flex flex-col items-center gap-2">
+                        <img :src="formData.cover_image_url" alt="Cover" class="w-full h-20 rounded-lg object-cover">
+                        <span class="text-xs text-[--electric-blue]">Click to change</span>
+                      </div>
+                      <div v-else class="flex flex-col items-center gap-2 py-2 text-gray-400">
+                        <Icon name="ph:image" class="w-10 h-10" />
+                        <span class="text-sm">Click to upload cover</span>
+                        <span class="text-xs">JPG, PNG, WebP</span>
+                      </div>
+                    </button>
+
+                    <!-- Manual URL fallback -->
+                    <input
+                      v-model="formData.cover_image_url"
+                      type="url"
+                      class="w-full mt-2 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[--electric-blue]"
+                      placeholder="Or paste image URL"
                     >
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-[--cool-grey-1] text-sm mb-1">Bio</label>
+                  <label class="block text-gray-600 text-sm mb-1">Bio</label>
                   <textarea
                     v-model="formData.bio"
                     rows="5"
-                    class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue] resize-y"
+                    class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue] resize-y"
                     placeholder="Athlete biography..."
                   />
                 </div>
@@ -421,55 +657,55 @@ useSeoMeta({
 
               <!-- ── Social Links ── -->
               <section class="space-y-4">
-                <h3 class="text-[--cool-grey-1] font-medium text-lg border-b border-[--cool-grey-2]/20 pb-2">
+                <h3 class="text-gray-700 font-medium text-lg border-b border-gray-200 pb-2">
                   Social Links
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="flex items-center gap-2 text-[--cool-grey-1] text-sm mb-1">
+                    <label class="flex items-center gap-2 text-gray-600 text-sm mb-1">
                       <Icon name="ph:instagram-logo" class="w-4 h-4" /> Instagram
                     </label>
                     <input
                       v-model="formData.social_links.instagram"
                       type="url"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="https://instagram.com/..."
                     >
                   </div>
 
                   <div>
-                    <label class="flex items-center gap-2 text-[--cool-grey-1] text-sm mb-1">
+                    <label class="flex items-center gap-2 text-gray-600 text-sm mb-1">
                       <Icon name="ph:x-logo" class="w-4 h-4" /> X / Twitter
                     </label>
                     <input
                       v-model="formData.social_links.twitter"
                       type="url"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="https://x.com/..."
                     >
                   </div>
 
                   <div>
-                    <label class="flex items-center gap-2 text-[--cool-grey-1] text-sm mb-1">
+                    <label class="flex items-center gap-2 text-gray-600 text-sm mb-1">
                       <Icon name="ph:youtube-logo" class="w-4 h-4" /> YouTube
                     </label>
                     <input
                       v-model="formData.social_links.youtube"
                       type="url"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="https://youtube.com/@..."
                     >
                   </div>
 
                   <div>
-                    <label class="flex items-center gap-2 text-[--cool-grey-1] text-sm mb-1">
+                    <label class="flex items-center gap-2 text-gray-600 text-sm mb-1">
                       <Icon name="ph:globe" class="w-4 h-4" /> Website
                     </label>
                     <input
                       v-model="formData.social_links.website"
                       type="url"
-                      class="w-full bg-[--charcoal-black] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-[--electric-blue]"
                       placeholder="https://..."
                     >
                   </div>
@@ -478,49 +714,49 @@ useSeoMeta({
 
               <!-- ── Competition Record ── -->
               <section class="space-y-4">
-                <h3 class="text-[--cool-grey-1] font-medium text-lg border-b border-[--cool-grey-2]/20 pb-2">
+                <h3 class="text-gray-700 font-medium text-lg border-b border-gray-200 pb-2">
                   Competition Record
                 </h3>
 
                 <!-- Add record form -->
-                <div class="bg-[--charcoal-black] rounded-lg p-4 space-y-3">
-                  <p class="text-[--cool-grey-1] text-sm font-medium">Add a Result</p>
+                <div class="bg-gray-100 rounded-lg p-4 space-y-3">
+                  <p class="text-gray-700 text-sm font-medium">Add a Result</p>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Event *</label>
+                      <label class="block text-gray-500 text-xs mb-1">Event *</label>
                       <input
                         v-model="recordForm.event"
                         type="text"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                         placeholder="UFC 305"
                       >
                     </div>
 
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Date</label>
+                      <label class="block text-gray-500 text-xs mb-1">Date</label>
                       <input
                         v-model="recordForm.date"
                         type="date"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                       >
                     </div>
 
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Opponent *</label>
+                      <label class="block text-gray-500 text-xs mb-1">Opponent *</label>
                       <input
                         v-model="recordForm.opponent"
                         type="text"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                         placeholder="Opponent name"
                       >
                     </div>
 
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Result *</label>
+                      <label class="block text-gray-500 text-xs mb-1">Result *</label>
                       <select
                         v-model="recordForm.result"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                       >
                         <option>Win</option>
                         <option>Loss</option>
@@ -530,23 +766,23 @@ useSeoMeta({
                     </div>
 
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Method *</label>
+                      <label class="block text-gray-500 text-xs mb-1">Method *</label>
                       <input
                         v-model="recordForm.method"
                         type="text"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                         placeholder="Submission / TKO / Decision..."
                       >
                     </div>
 
                     <div>
-                      <label class="block text-[--cool-grey-2] text-xs mb-1">Round</label>
+                      <label class="block text-gray-500 text-xs mb-1">Round</label>
                       <input
                         v-model.number="recordForm.round"
                         type="number"
                         min="1"
                         max="10"
-                        class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                        class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                         placeholder="Round #"
                       >
                     </div>
@@ -557,7 +793,7 @@ useSeoMeta({
                     <input
                       v-model="recordForm.notes"
                       type="text"
-                      class="w-full bg-[--deep-blue-tint] text-[--ice-white] border border-[--cool-grey-2]/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
+                      class="w-full bg-white text-gray-900 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[--electric-blue]"
                       placeholder="Optional notes"
                     >
                   </div>
@@ -577,46 +813,46 @@ useSeoMeta({
                   <div
                     v-for="(record, index) in formData.competition_record"
                     :key="index"
-                    class="flex items-center gap-3 bg-[--charcoal-black] rounded-lg px-4 py-3"
+                    class="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3"
                   >
                     <span
-                      class="text-xs font-medium px-2 py-0.5 rounded flex-shrink-0"
+                      class="text-xs font-medium px-2 py-0.5 rounded shrink-0"
                       :class="record.result === 'Win' ? 'text-[--hyper-lime] bg-[--hyper-lime]/10' : record.result === 'Loss' ? 'text-red-400 bg-red-400/10' : 'text-[--cool-grey-1] bg-[--cool-grey-1]/10'"
                     >
                       {{ record.result }}
                     </span>
                     <div class="flex-1 min-w-0">
-                      <p class="text-[--ice-white] text-sm truncate">
+                      <p class="text-gray-800 text-sm truncate">
                         vs {{ record.opponent }} — {{ record.method }}
                       </p>
-                      <p class="text-[--cool-grey-2] text-xs truncate">
+                      <p class="text-gray-500 text-xs truncate">
                         {{ record.event }} {{ record.date ? `· ${record.date}` : '' }} {{ record.round ? `· Rd ${record.round}` : '' }}
                       </p>
                     </div>
                     <button
                       type="button"
-                      class="text-red-400 hover:text-red-300 flex-shrink-0"
+                      class="text-red-400 hover:text-red-300 shrink-0"
                       @click="removeRecord(index)"
                     >
                       <Icon name="ph:x" class="w-5 h-5" />
                     </button>
                   </div>
                 </div>
-                <p v-else class="text-[--cool-grey-2] text-sm text-center py-2">
+                <p v-else class="text-gray-400 text-sm text-center py-2">
                   No results added yet.
                 </p>
               </section>
 
               <!-- Submit error -->
               <div v-if="submitError" class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-start gap-3">
-                <Icon name="ph:warning" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <Icon name="ph:warning" class="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                 <p class="text-red-400 text-sm">{{ submitError }}</p>
               </div>
 
             </div>
 
             <!-- Modal footer -->
-            <div class="sticky bottom-0 bg-[--deep-blue-tint] border-t border-[--cool-grey-2]/20 p-6 flex gap-4 rounded-b-xl">
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 flex gap-4 rounded-b-xl">
               <button
                 type="button"
                 class="flex-1 btn-secondary"

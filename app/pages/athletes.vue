@@ -69,8 +69,8 @@ useSeoMeta({
           <!-- Athlete Image -->
           <div class="relative h-64 bg-[--charcoal-black] overflow-hidden">
             <img
-              v-if="athlete.image_url"
-              :src="athlete.image_url"
+              v-if="athlete.avatar_image_url"
+              :src="athlete.avatar_image_url"
               :alt="athlete.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             >
@@ -90,9 +90,9 @@ useSeoMeta({
             </h2>
 
             <div class="flex flex-wrap gap-2 mb-3">
-              <span v-if="athlete.weight_class" class="flex items-center gap-1 text-[--cool-grey-2] text-sm">
-                <Icon name="ph:scales" class="w-4 h-4" />
-                {{ athlete.weight_class }}
+              <span v-if="athlete.weight_classes?.length" class="flex items-center gap-1 text-[--cool-grey-2] text-sm">
+                <Icon name="ph:scales" class="w-4 h-4 shrink-0" />
+                {{ athlete.weight_classes.join(' · ') }}
               </span>
               <span v-if="athlete.team" class="flex items-center gap-1 text-[--cool-grey-2] text-sm">
                 <Icon name="ph:shield" class="w-4 h-4" />
